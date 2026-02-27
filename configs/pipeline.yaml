@@ -1,0 +1,65 @@
+# ── Data ─────────────────────────────────────────────────────────────
+data:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  splits_dir: data/splits
+  # Synthetic generation parameters
+  synthetic:
+    n_benign: 8000
+    n_dga: 3000
+    n_exfiltration: 2000
+    seed: 42
+
+# ── Features ─────────────────────────────────────────────────────────
+features:
+  ngram_range: [2, 4]        # Character n-gram sizes (k=2,3,4)
+  max_features: 5000         # Top n-grams by TF-IDF score
+  min_df: 2                  # Minimum document frequency
+  max_df: 0.95               # Maximum document frequency fraction
+  sublinear_tf: true         # Log-normalize term frequencies
+  statistical:               # Statistical feature flags
+    entropy: true
+    length: true
+    char_distribution: true
+    subdomain_stats: true
+
+# ── Split ────────────────────────────────────────────────────────────
+split:
+  train_frac: 0.7
+  val_frac: 0.15
+  test_frac: 0.15
+  stratify: true
+  seed: 42
+
+# ── Model ────────────────────────────────────────────────────────────
+model:
+  type: xgboost              # xgboost | random_forest | logistic_regression
+  params:
+    n_estimators: 200
+    max_depth: 8
+    learning_rate: 0.1
+    subsample: 0.8
+    colsample_bytree: 0.8
+    eval_metric: mlogloss
+    random_state: 42
+
+# ── Training ─────────────────────────────────────────────────────────
+training:
+  resampling:
+    strategy: hybrid          # hybrid | smote | none
+    max_majority: 3000
+    target_minority_ratio: 0.3
+  cv_folds: 5
+
+# ── MLflow ───────────────────────────────────────────────────────────
+mlflow:
+  tracking_uri: mlruns
+  experiment_name: seqthreat-dns
+  model_registry: models/registry
+
+# ── Serving ──────────────────────────────────────────────────────────
+serving:
+  host: 0.0.0.0
+  port: 8000
+  model_path: models/registry/model.pkl
+  vectorizer_path: models/registry/vectorizer.pkl
