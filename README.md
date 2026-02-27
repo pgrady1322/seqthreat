@@ -13,20 +13,25 @@ Classifies DNS queries as **benign**, **DGA** (domain generation algorithm), or 
 │  Generate /  │───▶│  Stratified │───▶│    Train     │───▶│  Evaluate   │
 │  Download    │    │    Split    │    │  (MLflow)    │    │  (Test Set) │
 └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
-                                             │
-                   ┌─────────────────────────┤
-                   ▼                         ▼
-            ┌─────────────┐          ┌─────────────┐
-            │  N-gram     │          │ Statistical  │
-            │  TF-IDF     │          │  Features    │
-            └─────────────┘          └─────────────┘
-                   │                         │
-                   └────────┬────────────────┘
-                            ▼
-                     ┌─────────────┐
-                     │  FastAPI    │
-                     │  Serving    │
-                     └─────────────┘
+       │                                     │                    │
+       │                              ┌──────┤              ┌─────┤
+       ▼                              ▼      ▼              ▼     ▼
+┌─────────────┐                ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐
+│ Real Dataset│                │ N-gram │ │ Stat   │ │ SHAP   │ │ Adver- │
+│ Integration │                │ TF-IDF │ │Features│ │Explain │ │ sarial │
+└─────────────┘                └────────┘ └────────┘ └────────┘ └────────┘
+                                    │          │
+       ┌────────────────────────────┤          │
+       ▼                            ▼          ▼
+┌─────────────┐              ┌─────────────┐ ┌─────────────┐
+│  Optuna HP  │              │  FastAPI     │ │  Evidently  │
+│  Tuning     │              │  Serving     │ │  Drift Mon  │
+└─────────────┘              └─────────────┘ └─────────────┘
+                                               
+       ┌─────────────┐
+       │  Deep Learn  │  ← Char-CNN / Char-LSTM baseline
+       │  Baseline    │
+       └─────────────┘
 ```
 
 ### Key Concept: K-mers → N-grams
@@ -41,15 +46,20 @@ Classifies DNS queries as **benign**, **DGA** (domain generation algorithm), or 
 
 ### Stack
 
-| Component           | Technology         |
-|---------------------|--------------------|
-| Feature extraction  | Character n-gram TF-IDF (sklearn) |
-| Statistical features| Shannon entropy, char distributions |
-| Experiment tracking | MLflow 2.10+       |
-| Model serving       | FastAPI + Uvicorn   |
-| CI/CD               | GitHub Actions      |
-| Containerization    | Docker (multi-stage)|
-| Models              | XGBoost, Random Forest, Logistic Regression |
+| Component             | Technology                                  |
+|-----------------------|---------------------------------------------|
+| Feature extraction    | Character n-gram TF-IDF (sklearn)           |
+| Statistical features  | Shannon entropy, char distributions         |
+| Models                | XGBoost, Random Forest, Logistic Regression |
+| Deep learning         | Character-level CNN/LSTM (PyTorch)          |
+| HP tuning             | Optuna (TPE sampler)                        |
+| Explainability        | SHAP (TreeExplainer / KernelExplainer)      |
+| Adversarial testing   | Homoglyph, typo, encoding mutation attacks  |
+| Drift monitoring      | Evidently AI (KS, PSI, JS divergence)       |
+| Experiment tracking   | MLflow 2.10+                                |
+| Model serving         | FastAPI + Uvicorn                           |
+| CI/CD                 | GitHub Actions                              |
+| Containerization      | Docker (multi-stage)                        |
 
 ---
 
@@ -71,6 +81,11 @@ Classifies DNS queries as **benign**, **DGA** (domain generation algorithm), or 
 git clone https://github.com/pgrady1322/seqthreat.git
 cd seqthreat
 pip install -e ".[dev]"
+
+# Optional extras
+pip install -e ".[all]"    # tune + explain + drift + deep
+pip install -e ".[tune]"   # Optuna only
+pip install -e ".[deep]"   # PyTorch only
 ```
 
 ### 2. Run the Full Pipeline
@@ -84,6 +99,14 @@ seqthreat download -c configs/pipeline.yaml
 seqthreat split    -c configs/pipeline.yaml
 seqthreat train    -c configs/pipeline.yaml
 seqthreat evaluate -c configs/pipeline.yaml
+
+# Advanced features
+seqthreat tune         -c configs/pipeline.yaml -n 50
+seqthreat explain      -c configs/pipeline.yaml
+seqthreat adversarial  -c configs/pipeline.yaml
+seqthreat drift        -c configs/pipeline.yaml
+seqthreat deep-train   -c configs/pipeline.yaml --arch char_cnn
+seqthreat real-data    -c configs/pipeline.yaml --dga data/external/dga.csv
 ```
 
 ### 3. Serve the Model
@@ -133,26 +156,35 @@ Character n-grams of sizes 2–4 are extracted from each domain string, weighted
 ```
 seqthreat/
 ├── configs/
-│   └── pipeline.yaml          # Central configuration
+│   └── pipeline.yaml            # Central configuration
 ├── src/
-│   ├── cli.py                 # Click CLI entry point
+│   ├── cli.py                   # Click CLI entry point
 │   ├── data/
-│   │   ├── download.py        # Synthetic dataset generation
-│   │   └── split.py           # Stratified train/val/test split
+│   │   ├── download.py          # Synthetic dataset generation
+│   │   ├── real_datasets.py     # Real-world dataset loaders
+│   │   └── split.py             # Stratified train/val/test split
 │   ├── features/
-│   │   ├── ngram.py           # Character n-gram tokenizer (TF-IDF)
-│   │   └── statistical.py     # Entropy, length, char distribution features
+│   │   ├── ngram.py             # Character n-gram tokenizer (TF-IDF)
+│   │   └── statistical.py       # Entropy, length, char distribution features
 │   ├── training/
-│   │   ├── models.py          # Model factory (XGBoost, RF, LR)
-│   │   ├── train.py           # Training pipeline with MLflow
-│   │   └── evaluate.py        # Test evaluation + metrics
+│   │   ├── models.py            # Model factory (XGBoost, RF, LR)
+│   │   ├── train.py             # Training pipeline with MLflow
+│   │   ├── evaluate.py          # Test evaluation + metrics
+│   │   ├── tune.py              # Optuna hyperparameter tuning
+│   │   ├── explain.py           # SHAP explainability analysis
+│   │   ├── adversarial.py       # Adversarial robustness testing
+│   │   └── deep_model.py        # Char-CNN / Char-LSTM baselines
+│   ├── monitoring/
+│   │   └── drift.py             # Evidently data drift detection
 │   └── serving/
-│       └── app.py             # FastAPI serving endpoint
-├── tests/                     # pytest test suite
-├── .github/workflows/ci.yml   # CI: lint + test + Docker build
-├── Dockerfile                 # Multi-stage container
-├── Makefile                   # Developer targets
-└── pyproject.toml             # Python project config
+│       └── app.py               # FastAPI serving endpoint
+├── notebooks/
+│   └── 01_showcase.ipynb        # End-to-end demo notebook
+├── tests/                       # pytest test suite
+├── .github/workflows/ci.yml     # CI: lint + test + Docker build
+├── Dockerfile                   # Multi-stage container
+├── Makefile                     # Developer targets
+└── pyproject.toml               # Python project config
 ```
 
 ---
@@ -164,6 +196,59 @@ seqthreat/
 | GET    | `/health`     | Service health + model status |
 | POST   | `/predict`    | Classify DNS domains       |
 | GET    | `/model/info` | Model metadata + params    |
+
+---
+
+## Advanced Features
+
+### Hyperparameter Tuning (Optuna)
+
+Bayesian optimization with TPE sampler, per-model search spaces, StratifiedKFold CV, and MLflow nested run logging:
+
+```bash
+seqthreat tune -c configs/pipeline.yaml -n 50
+```
+
+### SHAP Explainability
+
+Per-class feature importance using TreeExplainer (XGBoost/RF) or KernelExplainer (LR). Generates bar plots, beeswarm plots, and importance CSVs:
+
+```bash
+seqthreat explain -c configs/pipeline.yaml
+```
+
+### Real Dataset Integration
+
+Plug in real-world DNS threat datasets (UMUDGA-2021, CIC-Bell-DNS-EXF-2021, Alexa top-1M) via file paths or config:
+
+```bash
+seqthreat real-data -c configs/pipeline.yaml --dga data/external/umudga.csv
+```
+
+### Deep Learning Baselines
+
+Character-level CNN and BiLSTM models that learn directly from raw domain strings (no hand-crafted features):
+
+```bash
+seqthreat deep-train -c configs/pipeline.yaml --arch char_cnn
+seqthreat deep-train -c configs/pipeline.yaml --arch char_lstm
+```
+
+### Adversarial Robustness
+
+Six mutation strategies (homoglyphs, typos, subdomain insertion, label shuffle, noise injection, encoding corruption) to test evasion resilience:
+
+```bash
+seqthreat adversarial -c configs/pipeline.yaml
+```
+
+### Evidently Drift Monitoring
+
+Detect feature distribution shift using KS / PSI / JS divergence tests, with HTML reports:
+
+```bash
+seqthreat drift -c configs/pipeline.yaml
+```
 
 ---
 
