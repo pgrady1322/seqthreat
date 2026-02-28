@@ -1,8 +1,15 @@
 # SeqThreat
 
+[![CI](https://github.com/pgrady1322/seqthreat/actions/workflows/ci.yml/badge.svg)](https://github.com/pgrady1322/seqthreat/actions/workflows/ci.yml)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/pgrady1322/seqthreat/blob/main/notebooks/01_showcase.ipynb)
+
 **Sequence-based DNS threat detection using character n-gram feature engineering** — applying genomics k-mer techniques to cybersecurity.
 
 Classifies DNS queries as **benign**, **DGA** (domain generation algorithm), or **exfiltration** (data tunnelling) using character n-gram TF-IDF features and statistical analysis.
+
+Full example notebook available with benign, DGA, and exfiltration training and classification: [Example Notebook](notebooks/01_showcase.ipynb)
 
 ---
 
