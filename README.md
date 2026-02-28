@@ -7,7 +7,7 @@
 
 **Sequence-based DNS threat detection using character n-gram feature engineering** — applying genomics k-mer techniques to cybersecurity.
 
-Classifies DNS queries as **benign**, **DGA** (domain generation algorithm), or **exfiltration** (data tunnelling) using character n-gram TF-IDF features and statistical analysis.
+Classifies DNS queries as **benign**, **DGA** (domain generation algorithm), or **exfiltration** (data tunnelling) using character n-gram TF-IDF features and statistical analysis. Development of this repo was inspired by work on genome assembly and the use of trained models for dynamic k-mer selection.
 
 Full example notebook available with benign, DGA, and exfiltration training and classification: [Example Notebook](notebooks/01_showcase.ipynb)
 
