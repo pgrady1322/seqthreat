@@ -12,12 +12,9 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 import joblib
-import numpy as np
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from src.features.ngram import NgramTokenizer
-from src.features.statistical import compute_statistical_features
 from src.training.models import LABEL_MAP
 from src.training.train import build_features
 

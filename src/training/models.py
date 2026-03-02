@@ -25,7 +25,7 @@ def compute_class_weights(y: np.ndarray) -> dict[int, float]:
     """Compute inverse-frequency class weights for imbalanced data."""
     classes, counts = np.unique(y, return_counts=True)
     total = len(y)
-    weights = {int(c): total / (len(classes) * cnt) for c, cnt in zip(classes, counts)}
+    weights = {int(c): total / (len(classes) * cnt) for c, cnt in zip(classes, counts, strict=True)}
     return weights
 
 

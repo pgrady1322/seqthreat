@@ -22,7 +22,6 @@ import pandas as pd
 
 from src.features.ngram import NgramTokenizer
 from src.features.statistical import compute_statistical_features
-from src.training.train import build_features
 
 logger = logging.getLogger(__name__)
 
@@ -71,8 +70,8 @@ def compute_drift_report(
         Drift summary with per-feature drift flags and statistics.
     """
     from evidently import ColumnMapping
-    from evidently.report import Report
     from evidently.metric_preset import DataDriftPreset
+    from evidently.report import Report
 
     cfg = cfg or {}
     output_dir = Path(output_dir)

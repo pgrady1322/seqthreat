@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from src.training.adversarial import (
     MUTATION_REGISTRY,
@@ -61,7 +60,7 @@ class TestShuffleLabels:
         result = shuffle_labels("api.cdn.google.com", rng=np.random.RandomState(42))
         assert result.endswith(".com")
         # All original labels should be present
-        original_parts = set("api.cdn.google.com".split("."))
+        original_parts = set(["api", "cdn", "google", "com"])
         result_parts = set(result.split("."))
         assert original_parts == result_parts
 

@@ -1,10 +1,6 @@
 """End-to-end integration test with synthetic data."""
 
-import tempfile
-from pathlib import Path
 
-import numpy as np
-import pytest
 
 from src.data.download import generate_synthetic_dns
 from src.data.split import stratified_split

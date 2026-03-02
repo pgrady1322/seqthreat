@@ -13,7 +13,6 @@ from pathlib import Path
 import joblib
 import pandas as pd
 
-from src.features.statistical import compute_statistical_features
 from src.training.models import LABEL_MAP
 from src.training.train import build_features, compute_metrics
 
@@ -46,9 +45,9 @@ def evaluate_pipeline(cfg: dict) -> dict:
 
     # Predict
     y_pred = model.predict(X_test)
-    y_prob = None
+    _y_prob = None
     if hasattr(model, "predict_proba"):
-        y_prob = model.predict_proba(X_test)
+        _y_prob = model.predict_proba(X_test)  # noqa: F841
 
     # Metrics
     metrics = compute_metrics(y_test, y_pred)

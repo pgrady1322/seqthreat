@@ -1,7 +1,6 @@
 """Tests for training pipeline helpers."""
 
 import numpy as np
-import pytest
 
 from src.features.ngram import NgramTokenizer
 from src.training.train import build_features, compute_metrics

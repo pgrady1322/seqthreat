@@ -14,10 +14,9 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
-from scipy.sparse import hstack, csr_matrix
+from scipy.sparse import csr_matrix, hstack
 from sklearn.metrics import (
     accuracy_score,
-    classification_report,
     f1_score,
     precision_score,
     recall_score,
@@ -59,10 +58,7 @@ def build_features(
         Combined sparse feature matrix.
     """
     # N-gram TF-IDF features
-    if fit:
-        ngram_matrix = tokenizer.fit_transform(domains)
-    else:
-        ngram_matrix = tokenizer.transform(domains)
+    ngram_matrix = tokenizer.fit_transform(domains) if fit else tokenizer.transform(domains)
 
     # Statistical features
     stat_cfg = cfg.get("features", {}).get("statistical", {})

@@ -13,7 +13,6 @@ the classifier is against adversarial evasion.
 
 from __future__ import annotations
 
-import copy
 import logging
 import string
 from pathlib import Path
@@ -23,7 +22,6 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score
 
-from src.training.models import LABEL_MAP
 from src.training.train import build_features
 
 logger = logging.getLogger(__name__)

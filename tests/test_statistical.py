@@ -1,9 +1,7 @@
 """Tests for statistical feature extraction."""
 
-import math
 
 import pandas as pd
-import pytest
 
 from src.features.statistical import (
     char_distribution,
@@ -13,7 +11,6 @@ from src.features.statistical import (
     shannon_entropy,
     subdomain_features,
 )
-
 
 # ── Shannon entropy ─────────────────────────────────────────────────
 

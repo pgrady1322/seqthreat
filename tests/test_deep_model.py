@@ -8,9 +8,10 @@ the whole test suite if torch's Conv1d has issues.
 from __future__ import annotations
 
 import pytest
-import torch
 
-from src.training.deep_model import (
+torch = pytest.importorskip("torch", reason="torch not installed — skipping deep model tests")
+
+from src.training.deep_model import (  # noqa: E402, I001
     CHAR2IDX,
     CharCNN,
     CharLSTM,

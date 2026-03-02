@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from src.monitoring.drift import _build_feature_df, _parse_drift_results
 
 

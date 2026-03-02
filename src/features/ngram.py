@@ -9,12 +9,11 @@ from __future__ import annotations
 
 import re
 from collections import Counter
-from typing import Sequence
+from collections.abc import Sequence
 
 import numpy as np
 from scipy.sparse import csr_matrix
 from sklearn.feature_extraction.text import TfidfVectorizer
-
 
 # ── Low-level n-gram extraction ─────────────────────────────────────
 
@@ -106,7 +105,7 @@ class NgramTokenizer:
 
     # ── Fit / Transform ─────────────────────────────────────────────
 
-    def fit(self, texts: Sequence[str]) -> "NgramTokenizer":
+    def fit(self, texts: Sequence[str]) -> NgramTokenizer:
         """Fit the TF-IDF vocabulary on a corpus of raw domain strings."""
         processed = [preprocess_domain(t) for t in texts]
         self._vectorizer.fit(processed)

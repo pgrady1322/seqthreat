@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
 from src.training.tune import SEARCH_SPACES, _suggest_param
 
 

@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 import tempfile
-from pathlib import Path
 
 import pandas as pd
-import pytest
 
 from src.data.real_datasets import (
     build_real_dataset,
@@ -105,6 +103,6 @@ class TestListAvailableDatasets:
 
     def test_has_metadata(self):
         datasets = list_available_datasets()
-        for name, info in datasets.items():
+        for _name, info in datasets.items():
             assert "description" in info
             assert "url" in info

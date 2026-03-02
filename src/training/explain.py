@@ -14,7 +14,6 @@ import joblib
 import numpy as np
 import pandas as pd
 
-from src.features.ngram import NgramTokenizer
 from src.training.models import LABEL_MAP
 from src.training.train import build_features
 
@@ -34,10 +33,7 @@ def compute_shap_values(model, X, feature_names: list[str] | None = None, max_sa
     n = min(max_samples, X.shape[0])
 
     # Subsample for speed
-    if hasattr(X, "toarray"):
-        X_sub = X[:n].toarray()
-    else:
-        X_sub = X[:n]
+    X_sub = X[:n].toarray() if hasattr(X, "toarray") else X[:n]
 
     if "xgb" in model_name or "forest" in model_name or "tree" in model_name:
         explainer = shap.TreeExplainer(model)
@@ -83,8 +79,8 @@ def generate_explanations(cfg: dict) -> dict:
     dict
         Summary with n_samples, n_features, top features per class.
     """
-    import shap
     import matplotlib
+    import shap
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
